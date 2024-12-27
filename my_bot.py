@@ -2,6 +2,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
 from ctransformers import AutoModelForCausalLM
+from huggingface_hub import hf_hub_download
 import os
 import logging
 
@@ -12,10 +13,26 @@ logging.basicConfig(level=logging.INFO)
 MAX_TOKENS = 2048
 
 def getLLamaresponse(text):
-    try:                                             # if you use a different model then 
-        llm = AutoModelForCausalLM.from_pretrained("TheBloke/MythoMax-L2-13B-GGUF", model_file="path\\to\\model\\.gguf", model_type="llama", gpu_layers=50) # change layers for less or more capable gpus
-        template="You are a helpful agent. Reply to the following message to the best of your knowledge. {question}"
-        prompt=PromptTemplate(input_variables=["question"],template=template)
+    try:
+        model_name = "TheBloke/MythoMax-L2-13B-GGUF"
+        model_file = "mythomax-l2-13b.Q5_K_S.gguf"
+        model_path = os.path.join(os.getcwd(), "models", model_file)
+        
+        if not os.path.exists(model_path):
+            print(f"Model not found. Downloading {model_name}...")
+            model_path = hf_hub_download(
+                repo_id=model_name,
+                filename=model_file,
+                local_dir=os.path.join(os.getcwd(), "models"),
+                local_dir_use_symlinks=False
+            )
+            print(f"Model downloaded to {model_path}")
+        
+        llm = AutoModelForCausalLM.from_pretrained(model_path, model_type="llama", gpu_layers=50)
+        
+        template = "You are a helpful assistant skilled in mathematics. Please answer the following question: {question}"
+        prompt = PromptTemplate(input_variables=["question"], template=template)
+        response = llm(prompt.format(question=text))
         response = llm(prompt.format(question=text))
         print(f"Full model response: {response}")
         return response

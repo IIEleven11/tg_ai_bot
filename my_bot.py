@@ -28,28 +28,31 @@ def getLLamaresponse(text):
         
         if not os.path.exists(model_path):
             print(f"Model not found. Downloading {model_name}...")
-            model_path = hf_hub_download(
-                repo_id=model_name,
-                filename=model_file,
-                local_dir=os.path.join(os.getcwd(), "models"),
-                local_dir_use_symlinks=False,
-                force_download=True,
-                force_filename=model_file,
-                progress_bar_class=tqdm
-            )
+            try:
+                model_path = hf_hub_download(
+                    repo_id=model_name,
+                    filename=model_file,
+                    local_dir=os.path.join(os.getcwd(), "models"),
+                    local_dir_use_symlinks=False
+                )
+                print(f"Model downloaded to {model_path}")
+            except Exception as download_error:
+                logging.error(f"Error downloading model: {str(download_error)}")
+                return "Sorry, I encountered an error while downloading the model. Please try again later."
             print(f"Model downloaded to {model_path}")
         
         llm = AutoModelForCausalLM.from_pretrained(model_path, model_type="llama", gpu_layers=50)
 
-        template = "You are a helpful assistant skilled in mathematics. Please answer the following question: {question}"
+        template = "You are a helpful assistant skilled in mathematics and general knowledge. Please answer the following question or respond to the following statement: {question}"
         prompt = PromptTemplate(input_variables=["question"], template=template)
         response = llm(prompt.format(question=text))
         print(f"Full model response: {response}")
         return response
     except Exception as e:
         logging.error(f"Error in getLLamaresponse: {str(e)}")
-        return "Sorry, I encountered an error while processing your request."
+        return "Sorry, I encountered an error while processing your request. Please try again or ask a different question."
 
+# Get the API token
 API_TOKEN = get_api_token()
 
 # Initialize bot and dispatcher

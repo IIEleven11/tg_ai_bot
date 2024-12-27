@@ -5,6 +5,7 @@ from ctransformers import AutoModelForCausalLM
 from huggingface_hub import hf_hub_download
 import os
 import logging
+from tqdm import tqdm
 
 load_dotenv()
 API_TOKEN="put token here"
@@ -16,6 +17,7 @@ def getLLamaresponse(text):
     try:
         model_name = "TheBloke/MythoMax-L2-13B-GGUF"
         model_file = "mythomax-l2-13b.Q5_K_S.gguf"
+        
         model_path = os.path.join(os.getcwd(), "models", model_file)
         
         if not os.path.exists(model_path):
@@ -24,12 +26,15 @@ def getLLamaresponse(text):
                 repo_id=model_name,
                 filename=model_file,
                 local_dir=os.path.join(os.getcwd(), "models"),
-                local_dir_use_symlinks=False
+                local_dir_use_symlinks=False,
+                force_download=True,
+                force_filename=model_file,
+                progress_bar_class=tqdm
             )
             print(f"Model downloaded to {model_path}")
         
         llm = AutoModelForCausalLM.from_pretrained(model_path, model_type="llama", gpu_layers=50)
-        
+
         template = "You are a helpful assistant skilled in mathematics. Please answer the following question: {question}"
         prompt = PromptTemplate(input_variables=["question"], template=template)
         response = llm(prompt.format(question=text))

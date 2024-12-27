@@ -3,3 +3,4 @@ aiogram==2.5
 openai==0.28.1
 langchain
 langchain_community
+huggingface_hub

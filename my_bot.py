@@ -8,10 +8,16 @@ import logging
 from tqdm import tqdm
 
 load_dotenv()
-API_TOKEN="put token here"
 logging.basicConfig(level=logging.INFO)
 
 MAX_TOKENS = 2048
+
+def get_api_token():
+    while True:
+        token = input("Please enter your Telegram Bot API token: ").strip()
+        if token and " " not in token:
+            return token
+        print("Invalid token. The token should not contain spaces. Please try again.")
 
 def getLLamaresponse(text):
     try:
@@ -38,19 +44,21 @@ def getLLamaresponse(text):
         template = "You are a helpful assistant skilled in mathematics. Please answer the following question: {question}"
         prompt = PromptTemplate(input_variables=["question"], template=template)
         response = llm(prompt.format(question=text))
-        response = llm(prompt.format(question=text))
         print(f"Full model response: {response}")
         return response
     except Exception as e:
         logging.error(f"Error in getLLamaresponse: {str(e)}")
         return "Sorry, I encountered an error while processing your request."
 
-bot=Bot(token=API_TOKEN)
-dp=Dispatcher(bot)
+API_TOKEN = get_api_token()
+
+# Initialize bot and dispatcher
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
 
 @dp.message_handler(commands=['start','help'])
 async def command_start_handler(message: types.Message):
-    await message.reply("")
+    await message.reply("Hello! I'm a bot that can help with mathematical questions. Ask me anything!")
 
 @dp.message_handler()
 async def echo(message: types.Message):
@@ -60,4 +68,5 @@ async def echo(message: types.Message):
     await message.reply(response)
 
 if __name__ == "__main__":
+    print("Bot is starting...")
     executor.start_polling(dp, skip_updates=True)

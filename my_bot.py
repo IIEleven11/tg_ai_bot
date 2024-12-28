@@ -43,7 +43,7 @@ def getLLamaresponse(text):
         
         llm = AutoModelForCausalLM.from_pretrained(model_path, model_type="llama", gpu_layers=50)
 
-        template = "You are a helpful assistant skilled in mathematics and general knowledge. Please answer the following question or respond to the following statement: {question}"
+        template = "You are a helpful assistant and conversational pro. Please answer the following question or respond to the following statement: {question}"
         prompt = PromptTemplate(input_variables=["question"], template=template)
         response = llm(prompt.format(question=text))
         print(f"Full model response: {response}")
@@ -61,7 +61,7 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands=['start','help'])
 async def command_start_handler(message: types.Message):
-    await message.reply("Hello! I'm a bot that can help with mathematical questions. Ask me anything!")
+    await message.reply("Hello! Hows it going!")
 
 @dp.message_handler()
 async def echo(message: types.Message):
